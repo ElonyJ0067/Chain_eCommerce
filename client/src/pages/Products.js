@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Card, Button, Form, InputGroup, Badge, Alert, ButtonGroup, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Form, InputGroup, Badge, Alert, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Web3Context } from '../context/Web3Context';
@@ -26,6 +26,50 @@ const Products = () => {
   }, []);
 
   useEffect(() => {
+    const filterAndSortProducts = () => {
+      let filtered = products;
+
+      // Filter by category
+      if (selectedCategory !== 'All') {
+        filtered = filtered.filter(p => p.category === selectedCategory);
+      }
+
+      // Filter by search query
+      if (searchQuery) {
+        filtered = filtered.filter(p => 
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.description.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+
+      // Filter by price range
+      filtered = filtered.filter(p => 
+        p.priceUsd >= priceRange.min && p.priceUsd <= priceRange.max
+      );
+
+      // Sort products
+      switch (sortBy) {
+        case 'price-low':
+          filtered.sort((a, b) => a.priceUsd - b.priceUsd);
+          break;
+        case 'price-high':
+          filtered.sort((a, b) => b.priceUsd - a.priceUsd);
+          break;
+        case 'name-asc':
+          filtered.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'name-desc':
+          filtered.sort((a, b) => b.name.localeCompare(a.name));
+          break;
+        case 'latest':
+        default:
+          filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          break;
+      }
+
+      setFilteredProducts(filtered);
+    };
+
     filterAndSortProducts();
   }, [selectedCategory, products, sortBy, searchQuery, priceRange]);
 
@@ -48,48 +92,6 @@ const Products = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const filterAndSortProducts = () => {
-    let filtered = products;
-
-    // Filter by category
-    if (selectedCategory !== 'All') {
-      filtered = filtered.filter(p => p.category === selectedCategory);
-    }
-
-    // Filter by search query
-    if (searchQuery) {
-      filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Filter by price range
-    filtered = filtered.filter(p => 
-      p.priceUsd >= priceRange.min && p.priceUsd <= priceRange.max
-    );    // Sort products
-    switch (sortBy) {
-      case 'price-low':
-        filtered.sort((a, b) => a.priceUsd - b.priceUsd);
-        break;
-      case 'price-high':
-        filtered.sort((a, b) => b.priceUsd - a.priceUsd);
-        break;
-      case 'name-asc':
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case 'name-desc':
-        filtered.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-      case 'latest':
-      default:
-        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        break;
-    }
-
-    setFilteredProducts(filtered);
   };
 
   const handleAddToCart = (product) => {

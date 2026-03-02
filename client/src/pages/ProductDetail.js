@@ -12,21 +12,21 @@ const ProductDetail = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5001/api/products/${id}`);
+        setProduct(response.data);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      }
+    };
+
     fetchProduct();
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
   }, [id]);
-
-  const fetchProduct = async () => {
-    try {
-      const response = await axios.get(`http://localhost:5001/api/products/${id}`);
-      setProduct(response.data);
-    } catch (error) {
-      console.error('Error fetching product:', error);
-    }
-  };
 
   if (!product) {
     return (

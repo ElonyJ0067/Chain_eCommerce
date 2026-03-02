@@ -12,14 +12,11 @@ const Cart = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState('');
   const [useSmartContract, setUseSmartContract] = useState(true);
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
+    if (!storedUser) {
       // Redirect to sign in if not logged in
       navigate('/signin');
     }
